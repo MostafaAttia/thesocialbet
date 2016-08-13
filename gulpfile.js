@@ -28,7 +28,8 @@ elixir(function(mix) {
             'bootstrap.js',
             'bootstrap.min.js',
             'metisMenu.js',
-            'sb-admin-2.js'
+            'sb-admin-2.js',
+            'app.js'
 
         ], './public/js/libs.js');
 });
