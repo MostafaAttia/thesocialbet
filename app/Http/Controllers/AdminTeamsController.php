@@ -3,32 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Photo;
-use App\Role;
-use App\User;
+use App\Team;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use Illuminate\Support\Facades\Session;
 
-class AdminUsersController extends Controller
+class AdminTeamsController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     public function index()
     {
-        $users = User::all();
+        //
 
-        return view('admin.users.index', compact('users'));
+        $teams = Team::all();
+
+        return view('admin.teams.index', compact('teams'));
     }
 
     /**
@@ -39,8 +34,8 @@ class AdminUsersController extends Controller
     public function create()
     {
         //
-        $roles = Role::lists('name', 'id')->all();
-        return view('admin.users.create', compact('roles'));
+
+        return view('admin.teams.create');
     }
 
     /**
@@ -51,12 +46,11 @@ class AdminUsersController extends Controller
      */
     public function store(Request $request)
     {
+        //
 
         $this->validate($request, [
             'name'      => 'required|max:255',
-            'email'     => 'required|email|max:255|unique:users,email',
-            'password'  => 'required|min:6|confirmed',
-            'image'     =>'required|image'
+            'image'     => 'required|image'
         ]);
 
         $input = $request->all();
@@ -67,23 +61,23 @@ class AdminUsersController extends Controller
             $file->move('images', $name);
             $photo = Photo::create(['path'=>$name]);
             $input['photo_id'] = $photo->id;
-
         }
 
-        User::create([
+        Team::create([
             'name'      => $request->name,
-            'email'     => $request->email,
-            'role_id'   => $request->role_id,
-            'is_active' => $request->is_active,
-            'password'  => bcrypt($request->password),
             'photo_id'  => $input['photo_id'],
             'created_at'=> Carbon::now(),
             'updated_at'=> Carbon::now()
         ]);
 
-        Session::flash('user_created', 'User ' . $request->name . ' Created Successfully!');
+        Session::flash('team_created', 'Team ' . $request->name . ' Created Successfully!');
 
-        return redirect('admin/users');
+        if($request->redirect){
+            return redirect('admin/teams/create');
+        } else {
+            return redirect('admin/teams');
+        }
+
     }
 
     /**
@@ -95,10 +89,8 @@ class AdminUsersController extends Controller
     public function show($id)
     {
         //
-
-        $user = User::find($id);
-
-        return view('admin/users/show', compact('user'));
+        $team = Team::findOrFail($id);
+        return view('admin.teams.show', compact('team'));
     }
 
     /**
@@ -110,10 +102,9 @@ class AdminUsersController extends Controller
     public function edit($id)
     {
         //
+        $team = Team::find($id);
 
-        $user = User::find($id);
-        $roles = Role::lists('name', 'id')->all();
-        return view('admin.users.edit', compact('user', 'roles'));
+        return view('admin.teams.edit', compact('team'));
     }
 
     /**
@@ -126,12 +117,11 @@ class AdminUsersController extends Controller
     public function update(Request $request, $id)
     {
         //
-        $user = User::find($id);
+
+        $team = Team::find($id);
 
         $this->validate($request, [
             'name'      => 'required|max:255',
-            'email'     => 'required|email|max:255'. ($user->email==$request->email ? '' : '|unique:users,email'),
-            'password'  => 'required|min:6|confirmed',
             'image'     =>'required|image'
         ]);
 
@@ -145,10 +135,8 @@ class AdminUsersController extends Controller
             $input['photo_id'] = $photo->id;
         }
 
-        $input['password'] = bcrypt($request->password);
-        $user->update($input);
-        return redirect('admin/users');
-
+        $team->update($input);
+        return redirect('admin/teams');
     }
 
     /**
@@ -161,18 +149,18 @@ class AdminUsersController extends Controller
     {
         //
 
-        $user = User::findOrFail($id);
-        $name = $user->name;
+        $team = Team::findOrFail($id);
+        $name = $team->name;
 
-        if($user->photo){
-            unlink(public_path(). $user->photo->path);
-            Photo::findOrFail($user->photo->id)->delete();
+        if($team->photo){
+            unlink(public_path(). $team->photo->path);
+            Photo::findOrFail($team->photo->id)->delete();
         }
 
-        $user->delete();
+        $team->delete();
 
-        Session::flash('user_deleted', 'User '. $name .' has been Deleted Successfully!' );
+        Session::flash('team_deleted', 'Team '. $name .' has been Deleted Successfully!' );
 
-        return redirect('admin/users');
+        return redirect('admin/teams');
     }
 }

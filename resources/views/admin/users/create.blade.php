@@ -54,8 +54,6 @@
                 {!! Form::file('image', ['class' => 'form-control', 'id'=>'image']) !!}
             </div>
         </div>
-        
-        
 
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
@@ -66,15 +64,7 @@
 
     {!! Form::close() !!}
 
-    @if(count($errors) > 0)
-        <div class="alert alert-danger">
-            <ul>
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+    @include('partials.errors')
 
 
 

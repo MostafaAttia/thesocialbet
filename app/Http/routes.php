@@ -19,8 +19,19 @@ Route::auth();
 
 Route::get('/home', 'HomeController@index');
 
-Route::get('/admin', function(){
-    return view('admin.index');
+
+Route::group(['middleware' => 'admin'], function () {
+
+    Route::get('/admin', function(){
+        return view('admin.index');
+    });
+
+    Route::resource('admin/users', 'AdminUsersController');
+    Route::resource('admin/teams', 'AdminTeamsController');
+    Route::resource('admin/matches', 'AdminMatchesController');
+    Route::resource('admin/predictions', 'AdminPredictionsController');
+
 });
 
-Route::resource('admin/users', 'AdminUsersController');
+
+
